@@ -33,11 +33,11 @@ def test_simulate(crane):
     """Test the simulate method."""
     u = [1, 1]
     dt = 0.1
-    output = crane.simulate(u, dt)
+    input_data, output_data = crane.simulate(u=u, dt=dt)
     #[0.00425885, 0.07179626, -0.03888268, -0.57694394, 0.10125, 0.025]
     expected_output = [0.0043, 0.0718, -0.0389, -0.5769, 0.1013, 0.025]
-    assert output is not None, "Simulation output is None!"
-    np.testing.assert_array_equal(np.round(output, 4), expected_output)
+    assert output_data is not None, "Simulation output is None!"
+    np.testing.assert_array_equal(np.round(output_data, 4), expected_output)
     assert crane.get_state() is not None, "State after simulation is None!"
 
 def test_update_matrices(crane):

@@ -2,17 +2,20 @@ import numpy as np
 from scipy.constants import g, pi
 from scipy.signal import StateSpace
 from src.model.Model import Model, Signal, Parameter
+from src.utils.plots import plot_signals
 
 
 class Crane1D(Model):
     def __init__(self):
         self.sys = None
-        self.signals = [Signal('Cart position', 'm', 0, 2),
-                        Signal('Cart velocity', 'm/s', -1, 1),
-                        Signal('Sway angle', 'rad', -pi, pi),
-                        Signal('Angular velocity', 'rad/s', -np.inf, np.inf),
-                        Signal('Sling length', 'm', 0.1, 1),
-                        Signal('Sling length changing speed', 'm/s', -1, 1)]
+        self.input  = [Signal('Drive force on cart', 'N', -2, 2),
+                       Signal('Drive force on payload', 'N', -2, 2)]
+        self.output = [Signal('Cart position', 'm', 0, 2),
+                       Signal('Cart velocity', 'm/s', -1, 1),
+                       Signal('Sway angle', 'rad', -pi, pi),
+                       Signal('Angular velocity', 'rad/s', -np.inf, np.inf),
+                       Signal('Sling length', 'm', 0.1, 1),
+                       Signal('Sling length changing speed', 'm/s', -1, 1)]
         self.parameters = [Parameter('Cart mass', 'kg', 1),
                            Parameter('Payload mass', 'kg', 2)]
         init_state = [0, 0, 0, 0, 0.1, 0]
@@ -57,4 +60,17 @@ class Crane1D(Model):
              [0, 0]]
 
         self.sys = StateSpace(matrix_a, matrix_b, matrix_c, matrix_d)
-        
+
+
+if __name__ == "__main__":
+    obj = Crane1D()
+    time_points = 101
+    t = np.linspace(0, 1, time_points)
+    u1 = [1,0.01]
+    u2 = [0.9, 0]
+    u = [u1]*50+[u2]*51
+    extortion, result = obj.simulate(u, t=t)
+    extortion, result = obj.simulate([1,0], dt=0.1)
+    plot_signals(data=extortion, signals=obj.input, plot_name="input")
+    plot_signals(data=result, signals=obj.output, plot_name="output")
+    print(result)

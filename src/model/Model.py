@@ -1,8 +1,9 @@
 import numpy as np
 from dataclasses import dataclass
 from abc import abstractmethod
+import pandas as pd
 from scipy.signal import lsim
-
+from src.utils.helpers import get_signal_info
 
 @dataclass
 class Signal:
@@ -23,6 +24,7 @@ class Model:
         self.state = None
         if init_state is None:
             raise ValueError("No initial state provided!")
+        self._init_state = init_state
         self.init_state(init_state)
         self.update_matrices()
 
@@ -39,8 +41,8 @@ class Model:
     def check_state(self, new_state=None):
         if new_state is None:
             new_state = self.state
-        min_state = np.array([param.min for param in self.signals])
-        max_state = np.array([param.max for param in self.signals])
+        min_state = np.array([param.min for param in self.output])
+        max_state = np.array([param.max for param in self.output])
         if any(new_state < min_state) or any(new_state > max_state):
             raise ValueError("State out of bounds!")
 
@@ -51,24 +53,40 @@ class Model:
     def get_state(self):
         return self.state
 
-    def simulate(self, u, dt):
-        # Ensure u is a 2D array and repeat the input for each time step
-        u = np.array([u, u])  # Repeat the input u for two time steps (t[0] and t[1])
-
+    def simulate(self, u, dt=None, t=None):
+        if t is None:
+            # Ensure u is a 2D array and repeat the input for each time step
+            u = np.array([u, u])  # Repeat the input u for two time steps (t[0] and t[1])
+            # Define the time span for the simulation (2 time steps)
+            t = np.array([0, dt])
+        else:
+            if len(u) == len(self.input):
+                u = np.array([u for ti in t])
+            else:
+                u = np.array(u)
         # Check the dimensions of the input matrix u
         _, columns_b = np.array(self.sys.B).shape
         if columns_b != u.shape[1]:
             raise ValueError("Inputs shape not equal!")
 
-        # Define the time span for the simulation (2 time steps)
-        t = np.array([0, dt])
-
         # Solve the differential equations and calculate output
-        t, y, state = lsim(self.sys, u, t, X0=self.state)
+        t, y, states = lsim(self.sys, u, t, X0=self.state)
 
         # Update the internal state to the new state after the simulation
-        self.state = state[-1]  # Take the last state (after dt)
-        return y[-1]  # Return the output at the last time step
+        self.state = states[-1]  # Take the last state (after dt)
+
+        # Create input dataframe
+        signal_info = get_signal_info(self.input)
+        input_data = pd.DataFrame(columns=signal_info['name'], data=u)
+        # Create output dataframe
+        signal_info = get_signal_info(self.output)
+        if dt is not None:
+            y = y[-1]
+            y = y.reshape([1,6])
+            y = y.flatten()
+        output_data = pd.DataFrame(columns=signal_info['name'], data=y)
+
+        return input_data, output_data  # Return the output at the last time step
 
     def get_param(self, parameter_name):
         for p in self.parameters:

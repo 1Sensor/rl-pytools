@@ -2,7 +2,6 @@ import numpy as np
 from scipy.constants import g, pi
 from scipy.signal import StateSpace
 from src.model.Model import Model, Signal, Parameter
-from src.utils.plots import plot_signals
 
 
 class Crane1D(Model):
@@ -63,14 +62,17 @@ class Crane1D(Model):
 
 
 if __name__ == "__main__":
+    from src.utils.plots import plot_signals
+
+
     obj = Crane1D()
     time_points = 101
     t = np.linspace(0, 1, time_points)
     u1 = [1,0.01]
     u2 = [0.9, 0]
     u = [u1]*50+[u2]*51
-    extortion, result = obj.simulate(u, t=t)
-    extortion, result = obj.simulate([1,0], dt=0.1)
-    plot_signals(data=extortion, signals=obj.input, plot_name="input")
-    plot_signals(data=result, signals=obj.output, plot_name="output")
-    print(result)
+    #control, results = obj.simulate(u, t=t)
+    control, results = obj.simulate([1,0], dt=0.1)
+    plot_signals(data=control, signals=obj.input, plot_name="input")
+    plot_signals(data=results, signals=obj.output, plot_name="output")
+    print(results)

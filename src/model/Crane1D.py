@@ -62,7 +62,7 @@ class Crane1D(Model):
 
 
 if __name__ == "__main__":
-    from src.utils.plots import plot_signals
+    from src.utils.aggregation import aggregate_simulation_data
 
 
     obj = Crane1D()
@@ -73,6 +73,8 @@ if __name__ == "__main__":
     u = [u1]*50+[u2]*51
     #control, results = obj.simulate(u, t=t)
     control, results = obj.simulate([1,0], dt=0.1)
-    plot_signals(data=control, signals=obj.input, plot_name="input")
-    plot_signals(data=results, signals=obj.output, plot_name="output")
+    simulation_data = [control, results]
+    signals = [obj.input, obj.output]
+    data_names = ['input', 'output']
+    aggregate_simulation_data(simulation_data, signals, data_names)
     print(results)

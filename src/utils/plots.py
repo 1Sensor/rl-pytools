@@ -10,7 +10,7 @@ TICK_FONTSIZE = 16
 plt.rcParams['font.family'] = 'serif'  # or 'sans-serif', 'monospace', etc.
 plt.rcParams['font.serif'] = ['Times New Roman']  # Specify the font name if using serif
 
-def plot_signals(data, signals, plot_name, fig_shape=None):
+def plot_signals(data, signals, save_path, fig_shape=None):
     signal_no = len(signals)
     if fig_shape is None:
         ncols = 2
@@ -35,4 +35,6 @@ def plot_signals(data, signals, plot_name, fig_shape=None):
         axs[i].grid(color='gray', linestyle='--', linewidth=0.5)
         axs[i].tick_params(axis='both', which='major', labelsize=TICK_FONTSIZE)
 
-    plt.savefig('..\\..\\results\\' + plot_name + ".pdf")
+
+    plt.savefig(save_path + ".pdf")
+    plt.savefig(save_path + ".jpg")

@@ -1,5 +1,4 @@
-from signal import signal
-
+import subprocess
 import pandas as pd
 
 
@@ -32,5 +31,15 @@ def find_signal_info(signals, signal_name, signal_attribute):
                 case 'max':
                     attribute = sig.max
     return attribute
+
+def get_git_repo_path():
+    try:
+        result = subprocess.run(['git', 'rev-parse', '--show-toplevel'], capture_output=True, text=True, check=True)
+        result = result.stdout.strip()
+        result = result.replace("/", "\\")
+        return result
+    except subprocess.CalledProcessError:
+        return "You are not in Git repository."
+
 
 

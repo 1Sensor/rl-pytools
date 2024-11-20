@@ -81,9 +81,7 @@ class Model:
         # Create output dataframe
         signal_info = get_signal_info(self.output)
         if dt is not None:
-            y = y[-1]
-            # y = y.reshape([1,6])
-            # y = y.flatten()
+            y = [y[-1]]
         output_data = pd.DataFrame(columns=signal_info['name'], data=y)
 
         return input_data, output_data  # Return the output at the last time step

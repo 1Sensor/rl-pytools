@@ -26,7 +26,7 @@ def aggregate_simulation_data(simulation_data, signals, data_names):
     save_path = create_new_directory_and_get_its_path()
 
     for data, signal, name in zip(simulation_data, signals, data_names):
-        save_path = save_path + name
-        plot_signals(data=data, signals=signal, save_path=save_path)
-        data.to_csv(save_path + '.csv')
-        data.to_excel(save_path + '.xlsx')
+        file_save_path = save_path + name
+        plot_signals(data=data, signals=signal, save_path=file_save_path)
+        data.to_csv(file_save_path + '.csv')
+        data.to_excel(file_save_path + '.xlsx')

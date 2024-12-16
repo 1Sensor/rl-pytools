@@ -53,6 +53,15 @@ class Model:
     def get_state(self):
         return self.state
 
+    def create_init_df(self):
+        # Create input dataframe
+        signal_info = get_signal_info(self.input)
+        input_data = pd.DataFrame(columns=signal_info['name'])
+        # Create output dataframe
+        signal_info = get_signal_info(self.output)
+        output_data = pd.DataFrame(columns=signal_info['name'])
+        return input_data, output_data
+
     def simulate(self, u, dt=None, t=None):
         if t is None:
             # Ensure u is a 2D array and repeat the input for each time step
@@ -75,13 +84,14 @@ class Model:
         # Update the internal state to the new state after the simulation
         self.state = states[-1]  # Take the last state (after dt)
 
+        if dt is not None:
+            u = [u[-1]]
+            y = [y[-1]]
         # Create input dataframe
         signal_info = get_signal_info(self.input)
         input_data = pd.DataFrame(columns=signal_info['name'], data=u)
         # Create output dataframe
         signal_info = get_signal_info(self.output)
-        if dt is not None:
-            y = [y[-1]]
         output_data = pd.DataFrame(columns=signal_info['name'], data=y)
 
         return input_data, output_data  # Return the output at the last time step

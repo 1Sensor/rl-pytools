@@ -1,4 +1,5 @@
 from scipy.integrate import odeint
+import numpy as np
 
 
 def derivative(self, u, dt):

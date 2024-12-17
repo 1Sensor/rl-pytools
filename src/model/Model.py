@@ -11,12 +11,14 @@ class Signal:
     unit: str
     min:  float
     max:  float
+    symbol: str
 
 @dataclass
 class Parameter:
     name: str
     unit: str
     value:  float
+    symbol: str
 
 
 class Model:
@@ -53,13 +55,13 @@ class Model:
     def get_state(self):
         return self.state
 
-    def create_init_df(self):
+    def create_init_dict(self):
         # Create input dataframe
         signal_info = get_signal_info(self.input)
-        input_data = pd.DataFrame(columns=signal_info['name'])
+        input_data = {name: [] for name in signal_info['name']}
         # Create output dataframe
         signal_info = get_signal_info(self.output)
-        output_data = pd.DataFrame(columns=signal_info['name'])
+        output_data = {name: [] for name in signal_info['name']}
         return input_data, output_data
 
     def simulate(self, u, dt=None, t=None):
@@ -84,17 +86,18 @@ class Model:
         # Update the internal state to the new state after the simulation
         self.state = states[-1]  # Take the last state (after dt)
 
+        input_info = get_signal_info(self.input)
+        output_info = get_signal_info(self.output)
         if dt is not None:
-            u = [u[-1]]
-            y = [y[-1]]
-        # Create input dataframe
-        signal_info = get_signal_info(self.input)
-        input_data = pd.DataFrame(columns=signal_info['name'], data=u)
-        # Create output dataframe
-        signal_info = get_signal_info(self.output)
-        output_data = pd.DataFrame(columns=signal_info['name'], data=y)
+            u = u[-1]
+            y = y[-1]
+            input_data = dict(zip(input_info['name'].to_list(), u))
+            output_data = dict(zip(output_info['name'].to_list(), y))
+        else:
+            input_data = pd.DataFrame(columns=input_info['name'], data=u)
+            output_data = pd.DataFrame(columns=output_info['name'], data=y)
 
-        return input_data, output_data  # Return the output at the last time step
+        return input_data, output_data
 
     def get_param(self, parameter_name):
         for p in self.parameters:

@@ -7,16 +7,16 @@ from src.model.Model import Model, Signal, Parameter
 class Crane1D(Model):
     def __init__(self):
         self.sys = None
-        self.input  = [Signal('Drive force on cart', 'N', -2, 2),
-                       Signal('Drive force on payload', 'N', -2, 2)]
-        self.output = [Signal('Cart position', 'm', 0, 2),
-                       Signal('Cart velocity', 'm/s', -1, 1),
-                       Signal('Sway angle', 'rad', -pi, pi),
-                       Signal('Angular velocity', 'rad/s', -np.inf, np.inf),
-                       Signal('Sling length', 'm', 0.1, 1),
-                       Signal('Sling length changing speed', 'm/s', -1, 1)]
-        self.parameters = [Parameter('Cart mass', 'kg', 1),
-                           Parameter('Payload mass', 'kg', 2)]
+        self.input  = [Signal('Drive force on cart', 'N', -2, 2, 'F_x'),
+                       Signal('Drive force on payload', 'N', -2, 2, 'F_l')]
+        self.output = [Signal('Cart position', 'm', 0, 2, 'x'),
+                       Signal('Cart velocity', 'm/s', -1, 1, 'v_x'),
+                       Signal('Sway angle', 'rad', -pi, pi, '\\alpha'),
+                       Signal('Angular velocity', 'rad/s', -np.inf, np.inf, '\\omega'),
+                       Signal('Sling length', 'm', 0.1, 1, 'l'),
+                       Signal('Sling length changing speed', 'm/s', -1, 1, 'v_l')]
+        self.parameters = [Parameter('Cart mass', 'kg', 1, 'm_c'),
+                           Parameter('Payload mass', 'kg', 2, 'm_p')]
         init_state = [0, 0, 0, 0, 0.1, 0]
         super().__init__(init_state)
 

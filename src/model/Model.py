@@ -4,6 +4,8 @@ from abc import abstractmethod
 import pandas as pd
 from scipy.signal import lsim
 from src.utils.helpers import get_signal_info
+from abc import ABC, abstractmethod
+
 
 @dataclass
 class Signal:
@@ -21,7 +23,7 @@ class Parameter:
     symbol: str
 
 
-class Model:
+class Model(ABC):
     def __init__(self, init_state=None):
         self.state = None
         if init_state is None:

@@ -1,69 +1,54 @@
 import numpy as np
-from scipy.linalg import solve_continuous_are
+from abc import ABC, abstractmethod
 from src.utils.helpers import get_signal_info, append_new_values
 from src.model.Model import Signal
-from src.algorithm.Algorithm import Algorithm
 
-class LQR(Algorithm):
-    def __init__(self, A, B, Q, R, model_signals=None):
-        super().__init__(model_signals)
-        """
-        Initialize the LQR controller.
 
-        Parameters:
-        A (numpy.ndarray): System dynamics matrix.
-        B (numpy.ndarray): Input matrix.
-        Q (numpy.ndarray): State cost matrix.
-        R (numpy.ndarray): Input cost matrix.
-        """
-        self.A = A
-        self.B = B
-        self.Q = Q
-        self.R = R
-        self.K = None
-        self.P = None
+class Algorithm(ABC):
+    def __init__(self, model_signals):
         self.gain = None
+        self.K = None
 
-        self.compute_gains()
         if model_signals is not None:
             self.create_gain_description(model_signals)
 
+    @abstractmethod
     def compute_gains(self):
         """
         Compute the optimal gain matrix K and solution to the Riccati equation P.
         """
-        # Solve the continuous-time algebraic Riccati equation (ARE)
-        self.P = solve_continuous_are(self.A, self.B, self.Q, self.R)
+        pass
 
-        # Compute the LQR gain K
-        self.K = np.linalg.inv(self.R) @ self.B.T @ self.P
-
-    def control_input(self, x):
+    @abstractmethod
+    def control_input(self):
         """
-        Compute the control input based on the current state x.
+        Compute the control input.
+        """
+        pass
+
+    def create_gain_description(self, model_signals):
+        """
+        Create gain variable with description of signals in the
+        form of Signal dataclass.
 
         Parameters:
-        x (numpy.ndarray): Current state vector.
+        model_signals (dataclass Signal): Model signals information.
+        """
+        signal_info = get_signal_info(model_signals)
+        self.gain = [Signal('$K_{'+ symbol + '}$', '-', -np.inf, np.inf, '-') for symbol in signal_info['symbol']]
+
+    def create_init_dict(self):
+        """
+        Create empty dataframe for collection of gain values.
+
+        Parameters:
+        signals (dataclass Signal): Information about the signals of the model.
 
         Returns:
-        numpy.ndarray: Control input vector.
+        dict: Empty dict of gain values.
         """
-        if self.K is None:
-            raise ValueError("The gain matrix K has not been computed.")
-
-        return self.K @ x
-
-    def update_state_matrices(self, A, B):
-        """
-        Update the state-space matrices and recompute the LQR gains.
-
-        Parameters:
-        A (numpy.ndarray): New system dynamics matrix.
-        B (numpy.ndarray): New input matrix.
-        """
-        self.A = A
-        self.B = B
-        self.compute_gains()
+        signal_info = get_signal_info(self.gain)
+        return {name: [] for name in signal_info['name']}
 
     def filter_gains(self, tol=1e-10):
         """
